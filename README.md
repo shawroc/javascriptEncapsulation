@@ -1,1 +1,1 @@
-# javascriptEncapsulation
+# JavaScript模块封装
