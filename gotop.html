@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Go-TOP</title>
+    <style>
+        .ct {
+            height: 1800px;
+            background: red;
+        }
+        .ct .top {
+            width: 150px;
+            height: 100px;
+            position: fixed;
+            right: 50px;
+            bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ct">
+    </div>
+    <script>
+        function GoTop() {
+            this.ct = document.querySelector('.ct');
+            this.target = this.createNode();
+            this.bindEvent();
+            this.clock;
+        }
+
+        GoTop.prototype.createNode = function(){
+            var gotopButton = document.createElement('button');
+            gotopButton.className = 'top';
+            gotopButton.textContent = 'Go Top';
+            this.ct.appendChild(gotopButton);
+            return gotopButton;
+        }
+        
+        GoTop.prototype.bindEvent = function(){
+            var self = this;
+            self.target.style.visibility = 'hidden';
+            window.addEventListener('scroll', function(){
+                if(self.clock) {
+                    clearTimeout(self.clock);
+                }
+                self.clock = setTimeout(function(){
+                    if (window.scrollY > 800) {
+                    self.target.style.visibility = 'visible';
+                    } else {
+                        self.target.style.visibility = 'hidden';
+                    }
+                },300)
+            });
+
+            self.target.addEventListener('click', function(){
+                window.scrollTo(0,0);
+            })
+        }
+
+        var gotop = new GoTop();
+    </script>
+</body>
+</html>
