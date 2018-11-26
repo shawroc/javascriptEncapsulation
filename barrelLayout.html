@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .ct {
+            width: 1200px;
+            margin: 0 auto;
+        }
+        .clearfix::after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+        img {
+            float: left;
+            padding: 5px;
+        }
+        .gotop-button {
+            height: 60px;
+            width: 90px;
+            background-color: #ccc;
+            position: fixed;
+            right: 50px;
+            bottom: 50px;
+            border-radius: 20px;
+            outline-style: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="ct clearfix">
+    </div>
+    <script>
+        function BarrelLayout(imgCTDOM){
+            this.ct = imgCTDOM;
+            this.pageIndex = 1;
+            this.lock = false;
+            this.clock = null;
+            this.api_key = '10135487-709e1b42869233bd4928ed887';
+            this.keywords = '';
+            this.loadImg();
+            this.goTopButton = this.createGoTopButtonAndFlag();
+            this.bindEvent();
+            this.imgRowList = [];
+            this.isDataEnd = false;
+        }
+        BarrelLayout.prototype = {
+            constructor: BarrelLayout,
+            loadImg: function(){
+                this.sendHttpRequest();
+            },
+            sendHttpRequest: function(){
+                var self = this;
+                var httpRequest = new XMLHttpRequest();
+                if(self.lock) {
+                    return;
+                }
+                lock = true;
+                httpRequest.onreadystatechange = function(){
+                    if(httpRequest.readyState == 4) {
+                        if(httpRequest.status >= 200 && httpRequest.status < 300 || httpRequest.status === 304) {
+                            self.transformResponseDataToDOM(JSON.parse(httpRequest.responseText));
+                            self.lock = false;
+                            if(self.isInViewPort(document.getElementById('flag')) && !self.lock && !self.isDataEnd) {
+                                self.sendHttpRequest();
+                            };
+                        } else {
+                            console.log('request failed ' + httpRequest.status);
+                            self.isDataEnd = true;
+                        }
+                    };
+                };
+                httpRequest.open('GET', 'https://pixabay.com/api/?key=' + self.api_key + '&q=' + encodeURIComponent(self.keywords) + '&page=' + self.pageIndex);
+                httpRequest.send();
+            },
+            transformResponseDataToDOM(responseData){
+                var self = this;
+                for(var i = 0; i < responseData.hits.length; i ++) {
+                    var img = new Image();
+                    img.setAttribute('data-imgSrc', responseData.hits[i].webformatURL);
+                    var imgInfo = {
+                        imgElement: img,
+                        width: (200 * responseData.hits[i].webformatWidth) / responseData.hits[i].webformatHeight,
+                        height: 200,
+                        imgSrc: img.getAttribute('data-imgSrc')
+                    };
+                    self.renderImage(imgInfo);
+                };
+                self.pageIndex ++;
+            },
+            renderImage: function(imgInfo){
+                var imgRowWidth = 0,
+                    newRowHeight = 0,
+                    windowInnerWidth = this.ct.offsetWidth;
+                this.imgRowList.push(imgInfo);
+                for(var i = 0; i < this.imgRowList.length; i++) {
+                    imgRowWidth += this.imgRowList[i].width;
+                };
+                if(imgRowWidth > windowInnerWidth) {
+                    this.imgRowList.pop();
+                    newRowHeight = (200 * windowInnerWidth)/(imgRowWidth - imgInfo.width);
+                    this.layout(newRowHeight);
+                    this.imgRowList = [];
+                    this.imgRowList.push(imgInfo);
+                };
+                
+            },
+            layout: function(newRowHeight){
+                for(var i = 0; i < this.imgRowList.length; i++) {
+                    this.imgRowList[i].imgElement.height = newRowHeight;
+                    this.imgRowList[i].imgElement.src = this.imgRowList[i].imgSrc;
+                    this.ct.appendChild(this.imgRowList[i].imgElement);
+                }
+            },
+            isInViewPort: function(img) {
+                var windowHeight = window.innerHeight,
+                    windowScrollTop = window.scrollY,
+                    imgTop = img.offsetTop;
+                if(imgTop >= windowScrollTop && imgTop < windowHeight + windowScrollTop) {
+                    return true;
+                }
+            },
+            createGoTopButtonAndFlag: function(){
+                var goTopButton = document.createElement('button'),
+                    flagElement = document.createElement('div'),
+                    documentBody = document.querySelector('body');
+                goTopButton.className = 'gotop-button';
+                goTopButton.textContent = 'Go Top';
+                goTopButton.style.visibility = 'hidden';
+                flagElement.id = 'flag';
+                flagElement.style.visibility = 'hidden';
+                documentBody.appendChild(goTopButton);
+                documentBody.appendChild(flagElement);
+                return goTopButton;                 
+            },
+            bindEvent: function(){
+                var self = this;
+                window.addEventListener('scroll', function(){
+                    if(self.clock) {
+                        clearTimeout(self.clock);
+                    };
+                    self.clock = setTimeout(function(){
+                        self.sendHttpRequest();
+                    },500);
+                    if(window.scrollY > (window.innerHeight/4)) {
+                        self.goTopButton.style.visibility = 'visible';
+                    } else {
+                        self.goTopButton.style.visibility = 'hidden';
+                    }
+                });
+                self.goTopButton.addEventListener('click', function(){
+                    window.scrollTo(0,0);
+                })
+            }
+        }
+       
+        var ct = document.querySelector('.ct');
+        var layout = new BarrelLayout(ct);
+    </script>
+</body>
+</html>
