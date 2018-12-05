@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            box-sizing: border-box;
+        }
+        .tab {
+            width: 50%;
+            margin: 30px auto;
+            border: 1px solid #ccc;
+            border-radius: 30px;
+        }
+        .tab ul {
+            margin: 5%
+        }
+        .tab .tab-menu {
+            border-bottom: 1px solid #ccc;
+        }
+        .tab-menu li {
+            text-align: center;
+            float: left;
+            padding: 15px 0;
+            width: 20%;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+        .clearfix::after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+        .active {
+            color: red;
+            border: 1px solid #ccc;
+            border-bottom-style: none;
+            background-color: #eee;
+        }
+
+        .tab .tab-content > li {
+            float: left;
+            display: none;
+        }
+        .tab .tab-content > li.active {
+            background-color: #fff;
+            border: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="tab">
+        <ul class="tab-menu clearfix">
+            <li class="active">Tab1</li>
+            <li>Tab2</li>
+            <li>Tab3</li>
+        </ul>
+        <ul class="tab-content clearfix">
+            <li class="active">Content1</li>
+            <li>Content2</li>
+            <li>Content3</li>
+        </ul>
+    </div>
+
+    <div class="tab">
+        <ul class="tab-menu clearfix">
+            <li class="active">Tab1</li>
+            <li>Tab2</li>
+            <li>Tab3</li>
+            <li>Tab4</li>
+        </ul>
+        <ul class="tab-content clearfix">
+            <li class="active">Content1</li>
+            <li>Content2</li>
+            <li>Content3</li>
+            <li>Content4</li>
+        </ul>
+    </div>
+
+    <div class="tab">
+            <ul class="tab-menu clearfix">
+                <li class="active">Tab1</li>
+                <li>Tab2</li>
+                <li>Tab3</li>
+                <li>Tab4</li>
+                <li>Tab5</li>
+            </ul>
+            <ul class="tab-content clearfix">
+                <li class="active">Content1</li>
+                <li>Content2</li>
+                <li>Content3</li>
+                <li>Content4</li>
+                <li>
+                    <ul>
+                        <li>content5</li>
+                        <li>content5</li>
+                        <li>content5</li>
+                        <li>content5</li>
+                        <li>content5</li>
+                        <li>content5</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    
+    <script>
+        function Tab(tabCt, tabMenuSelector, tabContent, targetNode) {
+            this.tab = tabCt;
+            this.tabMenus = this.tab.querySelector(tabMenuSelector);
+            this.tabMenuChildNodes = this.tabMenus.children;
+            this.tabContent = this.tab.querySelector(tabContent);
+            this.tabContentChildNodes = this.tabContent.children;
+            this.targetNode = targetNode;
+            this.bindEvent();
+        }
+        Tab.prototype.bindEvent = function(){
+            var self = this;
+            self.tabMenus.addEventListener('click', function(mouseEvent){
+                let targetElement = mouseEvent.target,
+                    len = self.tabMenuChildNodes.length;
+                if(targetElement.tagName.toLowerCase() === self.targetNode) {
+                    let index = [].indexOf.call(self.tabMenuChildNodes, targetElement);
+                    for(let i = 0; i < len; i ++ ) {
+                        self.tabMenuChildNodes[i].classList.remove('active');
+                        self.tabContentChildNodes[i].classList.remove('active');
+                    }
+                    self.tabMenuChildNodes[index].classList.add('active');
+                    self.tabContentChildNodes[index].classList.add('active');
+                }
+            })
+        }
+
+        var tab1 = new Tab(document.querySelectorAll('.tab')[0],'.tab-menu', '.tab-content', 'li');
+        var tab2 = new Tab(document.querySelectorAll('.tab')[1],'.tab-menu', '.tab-content', 'li');
+        var tab3 = new Tab(document.querySelectorAll('.tab')[2],'.tab-menu', '.tab-content', 'li');
+  
+    </script>
+</body>
+</html>
