@@ -12,6 +12,7 @@ var SlideShow = function(){
         this.clock;
         this.imgsCT.style.left = 0 + "%";
         this.duration = duration || 2500;
+        this.isAnimate = false;
         this.bindEvent();
     };
     _SlideShow.prototype.bindEvent = function(){
@@ -43,13 +44,14 @@ var SlideShow = function(){
     };
     _SlideShow.prototype.slideImage = function(idx) {
         let self = this;
-        self.animate(idx);
-        /* self.calculateOffset = -100 * idx;
-        self.imgsCT.style.left = self.calculateOffset + '%'; */
+        self.calculateOffset = -100 * idx;
+        self.imgsCT.style.left = self.calculateOffset + '%';
         self.imgIdxIconActive(idx);
         self.imgIdx = idx ++; 
     };
-    _SlideShow.prototype.animate = function(idx){
+   /*  
+    //还没优化好
+        _SlideShow.prototype.animate = function(idx){
         let self = this;
         let initialOffset = self.calculateOffset; 
         let calculateOffset = self.calculateOffset = -100 * idx;
@@ -58,17 +60,17 @@ var SlideShow = function(){
         let intervalKeyFrameOffset = keyframeTotalOffset/interval; 
         let imgsCTinitialOffset = parseInt(self.imgsCT.style.left);
         function animateGo() {
-            if( imgsCTinitialOffset >= calculateOffset) {
+            if( imgsCTinitialOffset >= calculateOffset ) {
                 self.imgsCT.style.left = imgsCTinitialOffset + '%';
                 imgsCTinitialOffset += intervalKeyFrameOffset;
                 setTimeout(animateGo, interval);
             } else {
-                //-400 >= 0 不成立，重置为0
                 self.imgsCT.style.left = -100* idx + '%';
-            }
+            };
+            self.isAnimate = false;
         };
         animateGo();
-    };
+    }; */
     _SlideShow.prototype.imgIdxIconActive = function(imgIdx) {
         for(let i = 0; i < this.imgIdxIcons.length; i++) {
             this.imgIdxIcons[i].classList.remove('active');  
