@@ -1,27 +1,35 @@
 let LazyLoad = function(){
-    function Exposure(node, callback, dataAttr) {
+    function Exposure(node, callback) {
         this.node = node;
         this.callback = callback;
-        this.dataImgSrcAttr = this.node.getAttribute(dataAttr);
-        this.bindEvent(this.node);
+        this.clock;
     };
-    Exposure.prototype.bindEvent = function(node){
-        if(node.tagName.toLowerCase() !== 'img') {
-            if(this.isInViewPort(node)) {
-                this.loadEle(this.callback);
+    Exposure.prototype.bindEleEvent = function(node){
+        let _LazyLoad = this;
+        window.addEventListener('scroll', function(){
+            if(_LazyLoad.isInViewPort(node)) {
+                _LazyLoad.callback(node);
             };
-        } else {
-            if(this.isInViewPort(node) && !this.isImageExposed(node)) {
-                this.loadImg(node);
-            };
-        };
+        });
     };
+    Exposure.prototype.bindImgEvent = function(node){
+        let _LazyLoad = this;
+        window.addEventListener('scroll', function(){
+                if(_LazyLoad.clock) {
+                    window.clearTimeout(_LazyLoad.clock);
+                }
+                _LazyLoad.clock = setTimeout(function(){
+                    _LazyLoad.node.forEach(function(item, index){
+                        if(_LazyLoad.isInViewPort(item) && !_LazyLoad.isImageExposed(item)) {
+                            _LazyLoad.callback(item);
+                        };
+                    }) 
+            }, 300);
+        });
+    }
     Exposure.prototype.loadEle = function(callback){
         callback(this.node);
     };
-    Exposure.prototype.loadImg = function(node) {
-        node.setAttribute('src', this.dataImgSrcAttr);
-    }
     Exposure.prototype.isInViewPort = function(node) {
         let viewPortHeight = document.documentElement.clientHeight,
             scrollY = document.documentElement.scrollTop,
@@ -37,39 +45,22 @@ let LazyLoad = function(){
     };
     return {
         create: function(node, callback) {
-            new Exposure(node, callback);
+            let lazyLoad = new Exposure(node, callback);
+            lazyLoad.bindEleEvent(node);
         },
-        image: function(node, callback, dataAttr) {
-            for(let i = 0; i < node.length; i++) {
-                new Exposure(node[i], callback, dataAttr);
-            };
+        image: function(node, callback) {
+            let lazyLoad = new Exposure(node, callback);
+            lazyLoad.bindImgEvent(node);
         }
     };
 }();
 
-
 //使用方法
-
-let clock;
-
 LazyLoad.create(document.querySelector('.helloworld'), function(node) {
-    console.log(node)
     node.textContent += " helloworld";
 });
 
-LazyLoad.image(document.querySelectorAll('.pic-ct img'), null, 'data-imgSrc');
-
-window.addEventListener('scroll', function(mouseEvent){
-    LazyLoad.create(document.querySelector('.helloworld'), function(node) {
-        node.textContent += " helloworld";
-    });
-});
-
-window.addEventListener('scroll', function(mouseEvent){
-    if(clock) {
-        window.clearTimeout(clock);
-    };
-    clock = setTimeout(function(){
-        LazyLoad.image(document.querySelectorAll('.pic-ct img'), null, 'data-imgSrc');
-    }, 300);
-});
+LazyLoad.image(document.querySelectorAll('.pic-ct img'), function(node){
+    let dataImgsrcAttr = node.getAttribute('data-imgsrc');
+    node.setAttribute('src', dataImgsrcAttr);
+}); 
